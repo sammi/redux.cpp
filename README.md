@@ -1,7 +1,7 @@
 # redux.cpp
 Implement redux framework by c++17
 
-# Open Redux.sln debug App.cpp
+# Quick Start
 
 ```
 #include <iostream>
