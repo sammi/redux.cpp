@@ -20,60 +20,6 @@ enum class ActionType {
 };
 
 struct Increment {
-	redux::Any payload() const { return _payload; }
-	redux::Any type() const { return _type; }
-	int _payload;
-	ActionType _type = { ActionType::increment };
-};
-
-struct Decrement {
-	redux::Any payload() const { return _payload; }
-	redux::Any type() const { return _type; }
-	int _payload;
-	ActionType _type = { ActionType::decrement };
-};
-
-using ThunkPayload = std::function<void(const redux::Dispatch, const redux::GetState<State>)>;
-
-struct Thunk {
-	ThunkPayload payload() const { return _payload; }
-	ActionType type() const { return _type; }
-	ThunkPayload _payload;
-	ActionType _type{ ActionType::thunk };
-};
-
-std::string toString(ActionType type) {
-	switch (type) {
-	case ActionType::increment:
-		return "inc";
-	case ActionType::decrement:
-		return "dec";
-	case ActionType::thunk:
-		return "thunk";
-	}
-}
-
-int main() {
-
-	const redux::Reducer<State>& reducer = [](State state, redux::Action<> action) {
-
-		int multiplier = 1;
-#include <iostream>
-#include <vector>
-#include "redux.h"
-
-struct State {
-	std::string toString() { return "counter: " + std::to_string(_counter); }
-	int _counter{ 0 };
-};
-
-enum class ActionType {
-	increment,
-	decrement,
-	thunk
-};
-
-struct Increment {
 	int payload() const { return _payload; }
 	ActionType type() const { return _type; }
 	int _payload;
@@ -175,5 +121,4 @@ int main() {
 	store.dispatch(Increment{1000});
 
 	return 0;
-}
-```
+}```
