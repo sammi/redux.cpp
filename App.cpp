@@ -14,15 +14,15 @@ enum class ActionType {
 };
 
 struct Increment {
-	redux::Any payload() const { return _payload; }
-	redux::Any type() const { return _type; }
+	int payload() const { return _payload; }
+	ActionType type() const { return _type; }
 	int _payload;
 	ActionType _type = { ActionType::increment };
 };
 
 struct Decrement {
-	redux::Any payload() const { return _payload; }
-	redux::Any type() const { return _type; }
+	int payload() const { return _payload; }
+	ActionType type() const { return _type; }
 	int _payload;
 	ActionType _type = { ActionType::decrement };
 };
