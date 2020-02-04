@@ -1,7 +1,7 @@
 # redux.cpp
 Implement redux framework by c++17
 
-# Open Visaul Studio 2019 Redux.sln, debug the following App.
+# Open Redux.sln, debug App.cpp
 
 ```
 #include <iostream>
