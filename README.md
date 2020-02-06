@@ -3,7 +3,7 @@ Implement redux framework by c++17
 
 # Quick Start
 
-```
+```C++
 #include <iostream>
 #include <vector>
 #include "redux.h"
