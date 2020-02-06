@@ -176,20 +176,20 @@ namespace redux {
 	};
 
 	template<typename State>
-	using GetState = std::function<State()>;
+	using GetState = std::function<const State()>;
 
 	template<typename State>
-	using Reducer = std::function<State(State, Action<>)>;
+	using Reducer = std::function<const State(const State, const Action<>)>;
 
 	template<typename State>
-	using Listener = std::function<void(State)>;
+	using Listener = std::function<void(const State)>;
 
 	template<typename State>
-	using Subscribe = std::function<Unsubscribe<>(Listener<State>)>;
+	using Subscribe = std::function<const Unsubscribe<>(const Listener<State>)>;
 
-	using Dispatch = std::function<Action<>(Action<>)>;
+	using Dispatch = std::function<const Action<>(const Action<>)>;
 
-	using DispatchTransform = std::function<Dispatch(Dispatch)>;
+	using DispatchTransform = std::function<const Dispatch(const Dispatch)>;
 
 	template <typename State>
 	class Middleware {
@@ -254,10 +254,10 @@ namespace redux {
 	};
 
 	template<typename State>
-	using MiddlewareDispatchTransform = std::function<DispatchTransform(Middleware<State>)>;
+	using MiddlewareDispatchTransform = std::function<const DispatchTransform(const Middleware<State>)>;
 
 	template<typename State>
-	using MiddlewareDispatchTransformChain = std::initializer_list<MiddlewareDispatchTransform<State>>;
+	using MiddlewareDispatchTransformChain = std::initializer_list<const MiddlewareDispatchTransform<State>>;
 
 	template <typename State>
 	class Store {
@@ -325,7 +325,7 @@ namespace redux {
 				std::begin(middlewareDispatchTransformChain), 
 				std::end(middlewareDispatchTransformChain), 
 				_dispatch,
-				[&](Dispatch dispatch, MiddlewareDispatchTransform<State> transform) -> Dispatch {
+				[&](const Dispatch& dispatch, const MiddlewareDispatchTransform<State>& transform) -> const Dispatch {
 					const auto& middleware = Middleware<State>(_dispatch, [&]() {return _state; });
 					return transform(middleware)(dispatch);
 				}
