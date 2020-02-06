@@ -70,7 +70,7 @@ int main() {
 			break;
 		}
 
-		auto payload = action.payload().as<int>();
+		int payload = action.payload().as<int>();
 
 		State newState{ state };
 		newState._counter += multiplier * payload;
@@ -102,7 +102,7 @@ int main() {
 		};
 	};
 
-	auto store = redux::createStore<State>(
+	redux::Store<State> store = redux::createStore<State>(
 		reducer,
 		State{},
 		{
