@@ -3,7 +3,7 @@
 #include "redux.h"
 
 struct State {
-	std::string toString() { return "counter: " + std::to_string(_counter); }
+	std::string toString() const { return "counter: " + std::to_string(_counter); }
 	int _counter{ 0 };
 };
 
@@ -36,7 +36,7 @@ struct Thunk {
 	ActionType _type{ ActionType::thunk };
 };
 
-std::string toString(ActionType type) {
+const std::string toString(ActionType type) {
 	switch (type) {
 	case ActionType::increment:
 		return "inc";
@@ -49,10 +49,10 @@ std::string toString(ActionType type) {
 
 int main() {
 
-	const redux::Reducer<State>& reducer = [](State state, redux::Action<> action) {
+	const redux::Reducer<State>& reducer = [](const State& state, const redux::Action<>& action) {
 
 		int multiplier = 1;
-		auto type = action.type().as<ActionType>();
+		ActionType type = action.type().as<ActionType>();
 		switch (type) {
 		case ActionType::decrement:
 			multiplier = -1;
@@ -64,26 +64,28 @@ int main() {
 			break;
 		}
 
-		auto payload = action.payload().as<int>();
-		state._counter += multiplier * payload;
-		return state;
+		int payload = action.payload().as<int>();
+
+		State newState{ state };
+		newState._counter += multiplier * payload;
+		return newState;
 	};
 
-	const redux::MiddlewareDispatchTransform<State>& loggingMiddleware = [](redux::Middleware<State> middleware) {
-		return [=](const redux::Dispatch& dispatch) {
-			return [=](redux::Action<> action) -> redux::Action<> {
+	const redux::MiddlewareDispatchTransform<State>& loggingMiddleware = [](const redux::Middleware<State>& middleware) -> const redux::DispatchTransform {
+		return [=](const redux::Dispatch& dispatch) -> const redux::Dispatch {
+			return [=](const redux::Action<> action) -> const redux::Action<> {
 				std::cout << "log before dispath action type: " << toString(action.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
 				const redux::Action<>& next = dispatch(action);
-				std::cout << "log after dispatch action type: " << toString(action.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
+				std::cout << "log after dispatch action type: " << toString(next.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
 				return next;
 			};
 		};
 	};
 
-	const redux::MiddlewareDispatchTransform<State>& thunkMiddleware = [](redux::Middleware<State> middleware) {
-		return [=](const redux::Dispatch& dispatch) {
-			return [=](redux::Action<> action) -> redux::Action<> {
-				auto type = action.type().as<ActionType>();
+	const redux::MiddlewareDispatchTransform<State>& thunkMiddleware = [](const redux::Middleware<State>& middleware) -> const redux::DispatchTransform {
+		return [=](const redux::Dispatch& dispatch) -> redux::Dispatch {
+			return [=](const redux::Action<>& action) -> redux::Action<> {
+				ActionType type = action.type().as<ActionType>();
 				if (type == ActionType::thunk) {
 					ThunkPayload thunkPayload = action.payload().as<ThunkPayload>();
 					thunkPayload(dispatch, middleware.getState());
@@ -94,7 +96,7 @@ int main() {
 		};
 	};
 
-	auto store = redux::createStore<State>(
+	redux::Store<State> store = redux::createStore<State>(
 		reducer,
 		State{},
 		{
@@ -106,9 +108,12 @@ int main() {
 	std::cout << "init state: " << store.state().toString() << std::endl;
 
 	store.dispatch(Thunk{
-		[&](redux::Dispatch dispatch, redux::GetState<State> getState) {
+		[=](const redux::Dispatch& dispatch, const redux::GetState<State>& getState) -> void {
+			std::cout << " state 1 : " << getState().toString() << std::endl;
 			dispatch(Increment{ 100 });
+			std::cout << " state 2 : " << getState().toString() << std::endl;
 			dispatch(Increment{ 300 });
+			std::cout << " state 3 : " << getState().toString() << std::endl;
 		}
 	});
 
