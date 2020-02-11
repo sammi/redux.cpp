@@ -20,6 +20,10 @@ namespace redux {
 			if (other._p) _p = std::unique_ptr<concept>(other._p->copy());
 		}
 
+		Any(Any&& other) noexcept {
+			_p = std::move(other._p);
+		}
+
 		template <typename T>
 		Any(const T& t) : _p(new concrete<T>(t)) {}
 
@@ -30,11 +34,6 @@ namespace redux {
 		}
 
 		Any& operator=(Any other) {
-			_p = std::move(other._p);
-			return *this;
-		}
-
-		Any& operator=(Any&& other) noexcept {
 			_p = std::move(other._p);
 			return *this;
 		}
