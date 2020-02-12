@@ -2,9 +2,13 @@
 #include <vector>
 #include "redux.h"
 
-struct State {
+class State {
+public:
+	explicit State(int counter=0) : _counter(counter) {};
+	int counter() const { return _counter; };
 	std::string toString() const { return "counter: " + std::to_string(_counter); }
-	int _counter{ 0 };
+private:
+	int _counter;
 };
 
 enum class ActionType {
@@ -13,25 +17,34 @@ enum class ActionType {
 	thunk
 };
 
-struct Increment {
+class Increment {
+public:
+	explicit Increment(int payload) : _payload(payload) {};
 	int payload() const { return _payload; }
 	ActionType type() const { return _type; }
+private:
 	int _payload;
 	ActionType _type = { ActionType::increment };
 };
 
-struct Decrement {
+class Decrement {
+public:
+	explicit Decrement(int payload) : _payload(payload) {};
 	int payload() const { return _payload; }
 	ActionType type() const { return _type; }
+private:
 	int _payload;
 	ActionType _type = { ActionType::decrement };
 };
 
 using ThunkPayload = std::function<void(const redux::Dispatch, const redux::GetState<State>)>;
 
-struct Thunk {
+class Thunk {
+public:
+	explicit Thunk(const ThunkPayload& payload) : _payload(payload) {};
 	ThunkPayload payload() const { return _payload; }
 	ActionType type() const { return _type; }
+private:
 	ThunkPayload _payload;
 	ActionType _type{ ActionType::thunk };
 };
@@ -44,6 +57,8 @@ const std::string toString(ActionType type) {
 		return "dec";
 	case ActionType::thunk:
 		return "thunk";
+	default:
+		return "";
 	}
 }
 
@@ -66,14 +81,12 @@ int main() {
 
 		int payload = action.payload().as<int>();
 
-		State newState{ state };
-		newState._counter += multiplier * payload;
-		return newState;
+		return State{ state.counter() + multiplier * payload };
 	};
 
-	const redux::MiddlewareDispatchTransform<State>& loggingMiddleware = [](const redux::Middleware<State>& middleware) -> const redux::DispatchTransform {
-		return [=](const redux::Dispatch& dispatch) -> const redux::Dispatch {
-			return [=](const redux::Action<> action) -> const redux::Action<> {
+	const redux::MiddlewareDispatchTransform<State>& loggingMiddleware = [](const redux::Middleware<State>& middleware) {
+		return [middleware](const redux::Dispatch& dispatch) {
+			return [dispatch, middleware](const redux::Action<> action) {
 				std::cout << "log before dispath action type: " << toString(action.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
 				const redux::Action<>& next = dispatch(action);
 				std::cout << "log after dispatch action type: " << toString(next.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
@@ -82,9 +95,9 @@ int main() {
 		};
 	};
 
-	const redux::MiddlewareDispatchTransform<State>& thunkMiddleware = [](const redux::Middleware<State>& middleware) -> const redux::DispatchTransform {
-		return [=](const redux::Dispatch& dispatch) -> redux::Dispatch {
-			return [=](const redux::Action<>& action) -> redux::Action<> {
+	const redux::MiddlewareDispatchTransform<State>& thunkMiddleware = [](const redux::Middleware<State>& middleware) {
+		return [middleware](const redux::Dispatch& dispatch) {
+			return [dispatch, middleware](const redux::Action<>& action) {
 				ActionType type = action.type().as<ActionType>();
 				if (type == ActionType::thunk) {
 					ThunkPayload thunkPayload = action.payload().as<ThunkPayload>();
@@ -108,7 +121,7 @@ int main() {
 	std::cout << "init state: " << store.state().toString() << std::endl;
 
 	store.dispatch(Thunk{
-		[=](const redux::Dispatch& dispatch, const redux::GetState<State>& getState) -> void {
+		[](const redux::Dispatch& dispatch, const redux::GetState<State>& getState) {
 			std::cout << " state 1 : " << getState().toString() << std::endl;
 			dispatch(Increment{ 100 });
 			std::cout << " state 2 : " << getState().toString() << std::endl;
