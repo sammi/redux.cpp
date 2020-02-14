@@ -12,43 +12,24 @@ private:
 	int _counter;
 };
 
+template<typename Type, typename Payload>
+class MyAction {
+public:
+	explicit MyAction(const Type& type, const Payload& payload) : _type(type), _payload(payload) {};
+	Payload payload() const { return _payload; }
+	Type type() const { return _type; }
+private:
+	Payload _payload;
+	Type _type;
+};
+
 enum class ActionType {
 	increment,
 	decrement,
 	thunk
 };
 
-class Increment {
-public:
-	explicit Increment(int payload) : _payload(payload) {};
-	int payload() const { return _payload; }
-	ActionType type() const { return _type; }
-private:
-	int _payload;
-	ActionType _type = { ActionType::increment };
-};
-
-class Decrement {
-public:
-	explicit Decrement(int payload) : _payload(payload) {};
-	int payload() const { return _payload; }
-	ActionType type() const { return _type; }
-private:
-	int _payload;
-	ActionType _type = { ActionType::decrement };
-};
-
 using ThunkPayload = std::function<void(const redux::Dispatch, const redux::GetState<State>)>;
-
-class Thunk {
-public:
-	explicit Thunk(const ThunkPayload& payload) : _payload(payload) {};
-	ThunkPayload payload() const { return _payload; }
-	ActionType type() const { return _type; }
-private:
-	ThunkPayload _payload;
-	ActionType _type{ ActionType::thunk };
-};
 
 const std::string toString(ActionType type) {
 	switch (type) {
@@ -121,17 +102,18 @@ int main() {
 
 	BOOST_LOG_TRIVIAL(info) << "init state: " << store.state().toString() << std::endl;
 
-	store.dispatch(Thunk{
+	store.dispatch(MyAction<ActionType, ThunkPayload> {
+		ActionType::thunk,
 		[](const redux::Dispatch& dispatch, const redux::GetState<State>& getState) {
 			BOOST_LOG_TRIVIAL(info) << " state 1 : " << getState().toString() << std::endl;
-			dispatch(Increment{ 100 });
+			dispatch(MyAction<ActionType, int>{ActionType::increment, 100 });
 			BOOST_LOG_TRIVIAL(info) << " state 2 : " << getState().toString() << std::endl;
-			dispatch(Increment{ 300 });
+			dispatch(MyAction<ActionType, int>{ActionType::decrement, 367 });
 			BOOST_LOG_TRIVIAL(info) << " state 3 : " << getState().toString() << std::endl;
 		}
 	});
 
-	store.dispatch(Increment{1000});
+	store.dispatch(MyAction<ActionType, int>{ActionType::increment, 1000});
 
 	return 0;
 }

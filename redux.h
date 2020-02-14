@@ -54,9 +54,7 @@ namespace redux {
 		template <typename T>
 		struct concrete : concept {
 			concrete(T const& t) : _t(t) {}
-
 			concept* copy() const override { return new concrete<T>(*this); }
-
 			T _t;
 		};
 
