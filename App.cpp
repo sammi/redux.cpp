@@ -1,5 +1,6 @@
-#include <iostream>
 #include <vector>
+#include <boost/log/trivial.hpp>
+
 #include "redux.h"
 
 class State {
@@ -87,9 +88,9 @@ int main() {
 	const redux::MiddlewareDispatchTransform<State>& loggingMiddleware = [](const redux::Middleware<State>& middleware) {
 		return [middleware](const redux::Dispatch& dispatch) {
 			return [dispatch, middleware](const redux::Action<> action) {
-				std::cout << "log before dispath action type: " << toString(action.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
+				BOOST_LOG_TRIVIAL(info) << "log before dispath action type: " << toString(action.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
 				const redux::Action<>& next = dispatch(action);
-				std::cout << "log after dispatch action type: " << toString(next.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
+				BOOST_LOG_TRIVIAL(info) << "log after dispatch action type: " << toString(next.type().as<ActionType>()) << " state:" << middleware.getState()().toString() << std::endl;
 				return next;
 			};
 		};
@@ -118,15 +119,15 @@ int main() {
 		}
 	);
 
-	std::cout << "init state: " << store.state().toString() << std::endl;
+	BOOST_LOG_TRIVIAL(info) << "init state: " << store.state().toString() << std::endl;
 
 	store.dispatch(Thunk{
 		[](const redux::Dispatch& dispatch, const redux::GetState<State>& getState) {
-			std::cout << " state 1 : " << getState().toString() << std::endl;
+			BOOST_LOG_TRIVIAL(info) << " state 1 : " << getState().toString() << std::endl;
 			dispatch(Increment{ 100 });
-			std::cout << " state 2 : " << getState().toString() << std::endl;
+			BOOST_LOG_TRIVIAL(info) << " state 2 : " << getState().toString() << std::endl;
 			dispatch(Increment{ 300 });
-			std::cout << " state 3 : " << getState().toString() << std::endl;
+			BOOST_LOG_TRIVIAL(info) << " state 3 : " << getState().toString() << std::endl;
 		}
 	});
 
