@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/log/trivial.hpp>
 #include "redux.h"
 
 namespace App {

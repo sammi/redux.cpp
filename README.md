@@ -4,9 +4,6 @@ Implement redux framework by c++17
 # Quick Start
 
 ```C++
-#include <boost/log/trivial.hpp>
-#include <unordered_map>
-
 #include "App.h"
 
 int main() {

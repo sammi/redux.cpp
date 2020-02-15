@@ -1,6 +1,3 @@
-#include <boost/log/trivial.hpp>
-#include <unordered_map>
-
 #include "App.h"
 
 int main() {
