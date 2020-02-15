@@ -5,28 +5,37 @@ Implement redux framework by c++17
 
 ```C++
 #include <boost/log/trivial.hpp>
+#include <unordered_map>
+
 #include "App.h"
 
 int main() {
 
-	const redux::Reducer<App::State>& reducer = [](const App::State& state, const redux::Action<>& action) {
+	const auto Increment = [](const App::State& state, int payload) {
+		return App::State{ state.counter() + payload };
+	};
 
-		int multiplier = 1;
-		App::ActionType type = action.type().as<App::ActionType>();
-		switch (type) {
-		case App::ActionType::decrement:
-			multiplier = -1;
-			break;
-		case App::ActionType::increment:
-			multiplier = 1;
-			break;
-		default:
-			break;
-		}
+	const auto Decrement = [](const App::State& state, int payload) {
+		return App::State{ state.counter() - payload };
+	};
+
+	std::unordered_map<App::ActionType, std::function<const App::State(const App::State&, int)>> funcMap = {
+		{App::ActionType::increment, Increment},
+		{App::ActionType::decrement, Decrement}
+	};
+
+	const redux::Reducer<App::State>& reducer = [funcMap](const App::State& state, const redux::Action<>& action) {
+
+		App::ActionType actionType = action.type().as<App::ActionType>();
 
 		int payload = action.payload().as<int>();
 
-		return App::State{ state.counter() + multiplier * payload };
+		auto search = funcMap.find(actionType);
+
+		if (search != funcMap.end() )
+			return search->second(state, payload);
+		else
+			return state;
 	};
 
 	const redux::MiddlewareDispatchTransform<App::State>& loggingMiddleware = [](const redux::Middleware<App::State>& middleware) {
