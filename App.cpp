@@ -19,8 +19,8 @@ public:
 	Payload payload() const { return _payload; }
 	Type type() const { return _type; }
 private:
-	Payload _payload;
 	Type _type;
+	Payload _payload;
 };
 
 enum class ActionType {
