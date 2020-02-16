@@ -161,8 +161,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
+    <ClInclude Include="Action.h" />
+    <ClInclude Include="Middleware.h" />
+    <ClInclude Include="Reducer.h" />
     <ClInclude Include="redux.h" />
+    <ClInclude Include="State.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />

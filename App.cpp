@@ -1,4 +1,8 @@
-#include "App.h"
+#include "redux.h"
+#include "State.h"
+#include "Action.h"
+#include "Reducer.h"
+#include "Middleware.h"
 
 int main() {
 
